@@ -14,6 +14,7 @@ logging.basicConfig(
 )
 
 if os.getenv("LOKI_URL"):
+    import atexit
     import logging_loki
     from multiprocessing import Queue
     loki_handler = logging_loki.LokiQueueHandler(
@@ -24,6 +25,7 @@ if os.getenv("LOKI_URL"):
         version="1",
     )
     logging.getLogger().addHandler(loki_handler)
+    atexit.register(loki_handler.listener.stop)
 
 from bot.app import create_dispatcher
 
