@@ -64,11 +64,14 @@ def add_report(toilet_id: int, telegram_id: int, reason: str) -> None:
 
 
 def log_event(telegram_id: int, event_type: str, payload: dict | None = None) -> None:
-    get_client().table("bot_events").insert({
-        "telegram_id": telegram_id,
-        "event_type": event_type,
-        "payload": payload or {},
-    }).execute()
+    try:
+        get_client().table("bot_events").insert({
+            "telegram_id": telegram_id,
+            "event_type": event_type,
+            "payload": payload or {},
+        }).execute()
+    except Exception:
+        pass
 
 
 def ensure_user(telegram_id: int, username: str | None) -> None:
