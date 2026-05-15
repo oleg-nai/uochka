@@ -63,6 +63,14 @@ def add_report(toilet_id: int, telegram_id: int, reason: str) -> None:
     client.rpc("maybe_hide_toilet", {"p_toilet_id": toilet_id}).execute()
 
 
+def log_event(telegram_id: int, event_type: str, payload: dict | None = None) -> None:
+    get_client().table("bot_events").insert({
+        "telegram_id": telegram_id,
+        "event_type": event_type,
+        "payload": payload or {},
+    }).execute()
+
+
 def ensure_user(telegram_id: int, username: str | None) -> None:
     client = get_client()
     client.table("users").upsert(

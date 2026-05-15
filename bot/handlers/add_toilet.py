@@ -1,13 +1,17 @@
 import asyncio
+import logging
+
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
-from bot.keyboards import share_location_keyboard, main_keyboard
-from db.queries import add_toilet, ensure_user
+
+from bot.keyboards import main_keyboard, share_location_keyboard
+from db.queries import add_toilet, ensure_user, log_event
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 class AddToiletForm(StatesGroup):
@@ -48,9 +52,10 @@ async def got_address(message: Message, state: FSMContext) -> None:
 @router.message(AddToiletForm.waiting_paid, F.text.in_({"Бесплатный", "Платный"}))
 async def got_paid(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
+    tg_id = message.from_user.id
     is_paid = message.text == "Платный"
 
-    await asyncio.to_thread(ensure_user, message.from_user.id, message.from_user.username)
+    await asyncio.to_thread(ensure_user, tg_id, message.from_user.username)
     await asyncio.to_thread(
         add_toilet,
         lat=data["lat"],
@@ -58,6 +63,13 @@ async def got_paid(message: Message, state: FSMContext) -> None:
         name="Туалет",
         address=data["address"],
         is_paid=is_paid,
+    )
+
+    await asyncio.to_thread(log_event, tg_id, "add_toilet", {"is_paid": is_paid, "address": data["address"]})
+    logger.info(
+        "user %s added toilet at %s (paid=%s)",
+        tg_id, data["address"], is_paid,
+        extra={"tags": {"event_type": "add_toilet"}},
     )
 
     await state.clear()

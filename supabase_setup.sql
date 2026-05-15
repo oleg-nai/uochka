@@ -41,6 +41,16 @@ create table if not exists reports (
     created_at timestamptz default now()
 );
 
+create table if not exists bot_events (
+    id bigserial primary key,
+    telegram_id bigint,
+    event_type text not null,
+    payload jsonb,
+    created_at timestamptz default now()
+);
+create index if not exists bot_events_type_idx on bot_events(event_type);
+create index if not exists bot_events_created_idx on bot_events(created_at);
+
 -- Spatial index
 create index if not exists toilets_location_idx on toilets using gist(location);
 
