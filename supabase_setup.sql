@@ -48,7 +48,7 @@ create index if not exists toilets_location_idx on toilets using gist(location);
 create or replace function find_nearest_toilets(
     user_lat float8,
     user_lon float8,
-    result_limit int default 5
+    result_limit int default 3
 )
 returns table (
     id bigint,
