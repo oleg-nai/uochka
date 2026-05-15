@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from bot.keyboards import report_reason_keyboard
@@ -27,8 +28,8 @@ async def on_reason(callback: CallbackQuery) -> None:
     _, toilet_id_str, reason = callback.data.split(":")
     toilet_id = int(toilet_id_str)
 
-    ensure_user(callback.from_user.id, callback.from_user.username)
-    add_report(toilet_id, callback.from_user.id, reason)
+    await asyncio.to_thread(ensure_user, callback.from_user.id, callback.from_user.username)
+    await asyncio.to_thread(add_report, toilet_id, callback.from_user.id, reason)
 
     label = REASON_LABELS.get(reason, reason)
     await callback.message.answer(f"Жалоба принята: «{label}». Спасибо!")

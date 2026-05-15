@@ -14,7 +14,7 @@ def get_client() -> Client:
     return _client
 
 
-def find_nearest_toilets(lat: float, lon: float, limit: int = 5) -> list[dict]:
+def find_nearest_toilets(lat: float, lon: float, limit: int = 3) -> list[dict]:
     client = get_client()
     result = client.rpc(
         "find_nearest_toilets",
@@ -23,7 +23,7 @@ def find_nearest_toilets(lat: float, lon: float, limit: int = 5) -> list[dict]:
     return result.data or []
 
 
-def add_toilet(lat: float, lon: float, name: str, address: str, is_paid: bool, telegram_id: int) -> dict:
+def add_toilet(lat: float, lon: float, name: str, address: str, is_paid: bool) -> dict:
     client = get_client()
     result = (
         client.table("toilets")

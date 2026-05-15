@@ -45,3 +45,13 @@ def share_location_keyboard() -> ReplyKeyboardMarkup:
         resize_keyboard=True,
         one_time_keyboard=True,
     )
+
+
+def main_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="📍 Найти туалет", request_location=True)],
+            [KeyboardButton(text="➕ Добавить туалет")],
+        ],
+        resize_keyboard=True,
+    )

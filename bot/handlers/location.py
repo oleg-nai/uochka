@@ -1,6 +1,7 @@
+import asyncio
 from aiogram import Router, F
 from aiogram.types import Message
-from bot.keyboards import route_keyboard
+from bot.keyboards import route_keyboard, main_keyboard
 from db.queries import find_nearest_toilets, ensure_user
 
 router = Router()
@@ -10,22 +11,22 @@ PAID_LABEL = {"True": "платный", "False": "бесплатный", True: "
 
 @router.message(F.location)
 async def handle_location(message: Message) -> None:
-    ensure_user(message.from_user.id, message.from_user.username)
+    await asyncio.to_thread(ensure_user, message.from_user.id, message.from_user.username)
 
     lat = message.location.latitude
     lon = message.location.longitude
 
-    toilets = find_nearest_toilets(lat, lon)
+    toilets = await asyncio.to_thread(find_nearest_toilets, lat, lon)
 
     if not toilets:
-        await message.answer("Рядом туалетов не найдено. Можешь добавить — /add")
+        await message.answer("Рядом туалетов не найдено. Можешь добавить!", reply_markup=main_keyboard())
         return
 
     for t in toilets:
         distance_m = int(t.get("distance_m", 0))
         distance_str = f"{distance_m} м" if distance_m < 1000 else f"{distance_m / 1000:.1f} км"
         paid_str = PAID_LABEL.get(t.get("is_paid"), "неизвестно")
-        name = t.get("name") or "Туалет"
+        name = t.get("name") or "Очко"
         address = t.get("address") or "адрес неизвестен"
 
         text = (
@@ -38,3 +39,5 @@ async def handle_location(message: Message) -> None:
             parse_mode="HTML",
             reply_markup=route_keyboard(t["id"], t["lat"], t["lon"]),
         )
+
+    await message.answer("Что дальше?", reply_markup=main_keyboard())
