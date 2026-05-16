@@ -1,6 +1,8 @@
 import asyncio
 import logging
+import os
 
+import aiohttp
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
@@ -12,6 +14,7 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 STARS_PRICE = 1
+ADMIN_ID = int(os.getenv("ADMIN_TELEGRAM_ID", "509530840"))
 
 
 @router.callback_query(F.data == "buy_premium")
@@ -51,6 +54,30 @@ async def successful_payment_handler(message: Message) -> None:
         "Отправь геолокацию чтобы проверить!",
         parse_mode="HTML",
     )
+
+
+@router.message(Command("balance"))
+async def balance_handler(message: Message) -> None:
+    if message.from_user.id != ADMIN_ID:
+        return
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"https://api.telegram.org/bot{message.bot.token}/getMyStarBalance",
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as resp:
+                data = await resp.json()
+        if not data.get("ok"):
+            await message.answer(f"Ошибка: {data.get('description', 'unknown')}")
+            return
+        amount = data["result"]["amount"]
+        await message.answer(
+            f"⭐️ Баланс бота: <b>{amount}</b>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        logger.error("getMyStarBalance failed: %s", e)
+        await message.answer(f"Ошибка получения баланса: {e}")
 
 
 @router.message(Command("premium"))
