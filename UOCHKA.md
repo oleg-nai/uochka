@@ -8,7 +8,7 @@
 
 - **Python 3.12 + aiogram 3.x**
 - **Supabase** — PostgreSQL + PostGIS, геозапросы
-- **Vercel** — деплой (webhook через serverless function)
+- **Railway** — деплой (polling mode)
 
 ---
 

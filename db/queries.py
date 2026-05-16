@@ -1,4 +1,6 @@
 import os
+from datetime import datetime, timezone
+
 from supabase import create_client, Client
 
 _client: Client | None = None
@@ -80,3 +82,23 @@ def ensure_user(telegram_id: int, username: str | None) -> None:
         {"telegram_id": telegram_id, "username": username},
         on_conflict="telegram_id",
     ).execute()
+
+
+def get_user(telegram_id: int) -> dict | None:
+    client = get_client()
+    result = (
+        client.table("users")
+        .select("id, telegram_id, is_premium, premium_since")
+        .eq("telegram_id", telegram_id)
+        .maybe_single()
+        .execute()
+    )
+    return result.data
+
+
+def set_premium(telegram_id: int) -> None:
+    client = get_client()
+    client.table("users").update({
+        "is_premium": True,
+        "premium_since": datetime.now(timezone.utc).isoformat(),
+    }).eq("telegram_id", telegram_id).execute()

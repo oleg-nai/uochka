@@ -5,7 +5,7 @@ from aiogram import BaseMiddleware, Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import TelegramObject
 
-from bot.handlers import add_toilet, location, report, start
+from bot.handlers import add_toilet, location, payment, report, start
 
 logger = logging.getLogger(__name__)
 
@@ -27,5 +27,6 @@ def create_dispatcher() -> Dispatcher:
     dp.include_router(start.router)
     dp.include_router(add_toilet.router)
     dp.include_router(report.router)
+    dp.include_router(payment.router)
     dp.include_router(location.router)
     return dp

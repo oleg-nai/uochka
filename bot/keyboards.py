@@ -55,3 +55,14 @@ def main_keyboard() -> ReplyKeyboardMarkup:
         ],
         resize_keyboard=True,
     )
+
+
+def unlock_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="⭐️ Разблокировать все туалеты (1 звезда)",
+                callback_data="buy_premium",
+            )
+        ],
+    ])

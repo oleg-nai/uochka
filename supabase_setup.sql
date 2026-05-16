@@ -7,7 +7,9 @@ create table if not exists users (
     telegram_id bigint unique not null,
     username text,
     created_at timestamptz default now(),
-    is_banned boolean default false
+    is_banned boolean default false,
+    is_premium boolean default false,
+    premium_since timestamptz
 );
 
 create table if not exists toilets (
@@ -53,6 +55,10 @@ create index if not exists bot_events_created_idx on bot_events(created_at);
 
 -- Spatial index
 create index if not exists toilets_location_idx on toilets using gist(location);
+
+-- Migration for existing installs: run this if the table already exists
+-- alter table users add column if not exists is_premium boolean default false;
+-- alter table users add column if not exists premium_since timestamptz;
 
 -- Function: find nearest toilets (returns id, lat, lon, distance_m, name, address, is_paid)
 create or replace function find_nearest_toilets(
